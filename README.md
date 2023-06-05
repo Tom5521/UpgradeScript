@@ -1,2 +1,2 @@
 # My upgrade script
-## My litle tool to upgrade arch linux and flatpak
+My litle tool to upgrade arch linux and flatpak
