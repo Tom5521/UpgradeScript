@@ -1,4 +1,4 @@
-# Upgrade Script V1
+# Upgrade Tool V1.1
 
 A command-line tool written in Go for upgrading the system and Flatpak packages on Arch Linux.
 
@@ -11,8 +11,9 @@ The tool takes optional command-line arguments that will be passed to the underl
 The following command-line arguments are recognized:
 
 - `noconfirm`: bypass confirmation prompts.
-
-The tool will first upgrade the system using the `yay` package manager, and then upgrade the Flatpak packages using the `flatpak` command-line tool.
+- `not-yay`: use `sudo pacman -Syu` instead of `yay` to upgrade the system.
+- `system`: only upgrade the system packages.
+- `flatpak`: only upgrade the Flatpak packages.
 
 ## Example
 
@@ -22,4 +23,13 @@ The tool will first upgrade the system using the `yay` package manager, and then
 
 # Upgrade the system and Flatpak packages without confirmation prompts
 ./upgrade noconfirm
+
+# Upgrade only the system packages
+./upgrade system
+
+# Upgrade only the Flatpak packages
+./upgrade flatpak
+
+# Upgrade the system packages using 'sudo pacman -Syu'
+./upgrade not-yay
 ```

@@ -27,6 +27,8 @@ func sys(command string) int {
 }
 
 func main() {
+	var command string = "yay "
+	var only_system, only_flatpak bool
 	var par2, par3 string = "", ""
 	vari := os.Args
 	par := strings.Join(vari, " ")
@@ -34,20 +36,28 @@ func main() {
 		par2 = "--noconfirm"
 		par3 = "--assumeyes"
 	}
+	if strings.Contains(par, "not-yay") {
+		command = "sudo pacman -Syu "
+	}
+	if strings.Contains(par, "system") {
+		only_system = true
+	}
+	if strings.Contains(par, "flatpak") {
+		only_flatpak = true
+	}
 	fmt.Println("----------------------Upgrade Tool V1-------------------------------")
-	for {
+	for !only_flatpak {
 		fmt.Println("--------------------------------------------------------------------")
 		fmt.Println("----------------------SYSTEM UPGRADES-------------------------------")
 		fmt.Println("--------------------------------------------------------------------")
-
-		cmd = sys("yay " + par2)
+		cmd = sys(command + par2)
 		if cmd == 1 {
 			fmt.Println("ERROR")
 		} else {
 			break
 		}
 	}
-	for {
+	for !only_system {
 		fmt.Println("--------------------------------------------------------------------")
 		fmt.Println("----------------------FLATPAK UPGRADES------------------------------")
 		fmt.Println("--------------------------------------------------------------------")
