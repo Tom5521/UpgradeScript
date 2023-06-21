@@ -11,7 +11,7 @@ var cmd, cmd2 int
 
 func sys(command string) int {
 
-	cmd := exec.Command("bash", "-c", command)
+	cmd := exec.Command("sh", "-c", command)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
