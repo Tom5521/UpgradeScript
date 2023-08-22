@@ -9,49 +9,62 @@ import (
 )
 
 var sh = commands.Sh{}
+var (
+	args                string = strings.Join(os.Args, ",")
+	flatkpakUpgradesTxt string = `
+--------------------------------------------------------------------
+----------------------FLATPAK UPGRADES------------------------------
+--------------------------------------------------------------------
+`
+	sysUpgradesTxt string = `
+--------------------------------------------------------------------
+----------------------SYSTEM UPGRADES-------------------------------
+--------------------------------------------------------------------
+`
+	printversion string = `
+----------------------Upgrade Tool V2-------------------------------`
+	// Format Cmd
+	noconfirm, assumeyes string
+	sysUpdatecmd         string = "yay -Syu"
+)
+
+func updateflatpak() {
+	fmt.Print(printversion, flatkpakUpgradesTxt)
+	err := sh.Cmd(fmt.Sprintf("flatpak upgrade %v", assumeyes))
+	if err != nil {
+		updateflatpak()
+	}
+}
+func updatesys() {
+	fmt.Print(printversion, sysUpgradesTxt)
+	err := sh.Cmd(fmt.Sprintf("%v %v", sysUpdatecmd, noconfirm))
+	if err != nil {
+		updatesys()
+	}
+}
 
 func main() {
-	var (
-		command                   string = "yay "
-		only_system, only_flatpak bool
-		par2, par3                string = "", ""
-		vari                             = os.Args
-		par                              = strings.Join(vari, " ")
-	)
-	if strings.Contains(par, "noconfirm") {
-		par2 = "--noconfirm"
-		par3 = "--assumeyes"
+	if len(os.Args) == 1 {
+		fmt.Println("defaul mode")
+		updatesys()
+		updateflatpak()
+		return
 	}
-	if strings.Contains(par, "not-yay") {
-		command = "sudo pacman -Syu "
+	if strings.Contains(args, "noconfirm") {
+		noconfirm = "--noconfirm"
+		assumeyes = "--assumeyes"
 	}
-	if strings.Contains(par, "system") {
-		only_system = true
+	if strings.Contains(args, "not-yay") {
+		sysUpdatecmd = "sudo pacman -Syu"
 	}
-	if strings.Contains(par, "flatpak") {
-		only_flatpak = true
-	}
-	fmt.Println("----------------------Upgrade Tool V1.0.1-------------------------------")
-	for !only_flatpak {
-		fmt.Println("--------------------------------------------------------------------")
-		fmt.Println("----------------------SYSTEM UPGRADES-------------------------------")
-		fmt.Println("--------------------------------------------------------------------")
-		err := sh.Cmd(command + par2)
-		if err != nil {
-			fmt.Println("ERROR")
-		} else {
-			break
-		}
-	}
-	for !only_system {
-		fmt.Println("--------------------------------------------------------------------")
-		fmt.Println("----------------------FLATPAK UPGRADES------------------------------")
-		fmt.Println("--------------------------------------------------------------------")
-		err := sh.Cmd("flatpak upgrade " + par3)
-		if err != nil {
-			fmt.Println("ERROR")
-		} else {
-			break
-		}
+	if strings.Contains(args, "system") {
+		updatesys()
+		return
+	} else if strings.Contains(args, "flatpak") {
+		updateflatpak()
+	} else {
+		updatesys()
+		updateflatpak()
+		return
 	}
 }
