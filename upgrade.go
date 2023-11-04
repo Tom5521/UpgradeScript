@@ -5,12 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Tom5521/MyGolangTools/commands"
+	"github.com/Tom5521/CmdRunTools/command"
 )
 
-var sh = commands.Sh{}
 var (
-	args                string = strings.Join(os.Args, ",")
 	flatkpakUpgradesTxt string = `
 --------------------------------------------------------------------
 ----------------------FLATPAK UPGRADES------------------------------
@@ -23,48 +21,58 @@ var (
 `
 	printversion string = `
 ----------------------Upgrade Tool V2-------------------------------`
-	// Format Cmd
-	noconfirm, assumeyes string
-	sysUpdatecmd         string = "yay -Syu"
 )
 
-func updateflatpak() {
-	fmt.Print(printversion, flatkpakUpgradesTxt)
-	err := sh.Cmd(fmt.Sprintf("flatpak upgrade %v", assumeyes))
+var sh = command.Cmd{}
+var args string = strings.Join(os.Args, " ")
+
+var (
+	noconfirm string
+	assumeyes string
+)
+
+func UpdateFlatpak() {
+	if strings.Contains(args, "system") {
+		return
+	}
+	sh.CustomStd(true, true, true)
+	sh.SetInput("flatpak upgrade " + assumeyes)
+	err := sh.Run()
 	if err != nil {
-		updateflatpak()
+		fmt.Println(err.Error())
+		UpdateFlatpak()
 	}
 }
-func updatesys() {
-	fmt.Print(printversion, sysUpgradesTxt)
-	err := sh.Cmd(fmt.Sprintf("%v %v", sysUpdatecmd, noconfirm))
+
+func UpdateSystem() {
+	if strings.Contains(args, "flatpak") {
+		return
+	}
+
+	var mode string = "yay"
+
+	if strings.Contains(args, "no-yay") {
+		mode = "sudo pacman -Syu"
+	}
+
+	sh.CustomStd(true, true, true)
+	cmd := fmt.Sprintf("%v %v", mode, noconfirm)
+	err := sh.SetAndRun(cmd)
 	if err != nil {
-		updatesys()
+		fmt.Println(err.Error())
+		UpdateSystem()
 	}
 }
 
 func main() {
-	if len(os.Args) == 1 {
-		fmt.Println("defaul mode")
-		updatesys()
-		updateflatpak()
-		return
-	}
 	if strings.Contains(args, "noconfirm") {
 		noconfirm = "--noconfirm"
 		assumeyes = "--assumeyes"
 	}
-	if strings.Contains(args, "not-yay") {
-		sysUpdatecmd = "sudo pacman -Syu"
-	}
-	if strings.Contains(args, "system") {
-		updatesys()
-		return
-	} else if strings.Contains(args, "flatpak") {
-		updateflatpak()
-	} else {
-		updatesys()
-		updateflatpak()
-		return
-	}
+	fmt.Print(printversion)
+	fmt.Print(sysUpgradesTxt)
+	UpdateSystem()
+	fmt.Print(flatkpakUpgradesTxt)
+	UpdateFlatpak()
+
 }
